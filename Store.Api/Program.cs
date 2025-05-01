@@ -1,11 +1,13 @@
 
 using Domain.Contracts;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Data;
 using Services;
 using Services.Abstractions;
-
+using Shared.ErrorsModels;
+using Store.Api.Middlewares;
 using AssemblyMapping = Services.AssemblyReference;
 
 namespace Store.Api
@@ -33,6 +35,26 @@ namespace Store.Api
             builder.Services.AddAutoMapper(typeof(AssemblyMapping).Assembly);
             builder.Services.AddScoped<IServiceManager,ServiceManager>();
 
+            builder.Services.Configure<ApiBehaviorOptions>(config =>
+            {
+                config.InvalidModelStateResponseFactory = actionContext =>
+                {
+                    var errors = actionContext.ModelState
+                        .Where(m => m.Value.Errors.Any())
+                        .Select(m => new ValidationError()
+                        {
+                            Field = m.Key,
+                            Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                        });
+
+                    var response = new ValidationErrorResponse()
+                    {
+                        Errors = errors
+                    };
+
+                    return new BadRequestObjectResult(response);
+                };
+            });
 
             var app = builder.Build();
 
@@ -45,6 +67,10 @@ namespace Store.Api
 
 
             #endregion
+
+
+            app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
