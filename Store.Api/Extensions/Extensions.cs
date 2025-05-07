@@ -4,6 +4,9 @@ using Persistence;
 using Services;
 using Domain.Contracts;
 using Store.Api.Middlewares;
+using Domain.Models.Identity;
+using Microsoft.AspNetCore.Identity;
+using Persistence.Identity;
 
 namespace Store.Api.Extensions
 {
@@ -17,6 +20,8 @@ namespace Store.Api.Extensions
           
 
             services.AddInfrastructureServices(configuration);
+            services.AddIdentityServices();
+
             services.AddApplicationServices();
 
 
@@ -30,6 +35,17 @@ namespace Store.Api.Extensions
 
 
             services.AddControllers();
+
+
+            return services;
+        }
+
+        private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        {
+
+
+            services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<StoreIdentityDbContext>();
 
 
             return services;
@@ -112,6 +128,7 @@ namespace Store.Api.Extensions
             using var scope = app.Services.CreateScope();
             var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
             await dbInitializer.InitializeAsync();
+            await dbInitializer.InitializeIdentityAsync();
 
 
             return app;
