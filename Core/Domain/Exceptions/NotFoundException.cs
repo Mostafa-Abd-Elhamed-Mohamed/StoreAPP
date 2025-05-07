@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Contracts
+namespace Domain.Exceptions
 {
-    public interface IDbInitializer
+  public abstract  class NotFoundException(string message) : Exception(message)
     {
-        Task InitializeAsync();
-        Task InitializeIdentityAsync();
     }
 }

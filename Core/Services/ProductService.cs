@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Contracts;
+using Domain.Exceptions;
 using Domain.Models;
 using Services.Abstractions;
 using Services.Specifications;
@@ -25,7 +26,7 @@ namespace Services
             var count = await unitOfWork.GetRepository<Product, int>().CountAsync(specCount);
 
             var result = mapper.Map<IEnumerable<ProductResultDto>>(products);
-            return new PaginationResponse<ProductResultDto>(specParams.PageIndex,specParams.PageSize,0,result);
+            return new PaginationResponse<ProductResultDto>(specParams.PageIndex,specParams.PageSize, count, result);
         }
 
         public async Task<ProductResultDto?> GetProductByIdAsync(int id)
@@ -34,7 +35,7 @@ namespace Services
 
 
             var product = await unitOfWork.GetRepository<Product, int>().GetAsync(spec);
-            if (product is null) return null;
+            if (product is null) throw new ProductNotFoundException(id);
 
             var result = mapper.Map<ProductResultDto>(product);
             return result;
