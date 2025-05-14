@@ -3,6 +3,7 @@ using Domain.Contracts;
 using Domain.Models;
 using Domain.Models.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Services.Abstractions;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 namespace Services
 {
     public class ServiceManager
-        (IUnitOfWork unitOfWork,IBasketRepository basketRepository,ICacheRepository cacheRepository, IMapper mapper , UserManager<AppUser> userManager) : IServiceManager
+        (IUnitOfWork unitOfWork,IBasketRepository basketRepository,ICacheRepository cacheRepository, IMapper mapper , UserManager<AppUser> userManager , IConfiguration configuration) : IServiceManager
     {
         
 
@@ -23,6 +24,6 @@ namespace Services
 
         public ICacheService CacheService { get; } = new CacheService(cacheRepository);
 
-        public IAuthService AuthService { get; } = new AuthService(userManager) ;
+        public IAuthService AuthService { get; } = new AuthService(userManager , configuration) ;
     }
 }
